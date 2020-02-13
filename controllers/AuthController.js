@@ -10,6 +10,26 @@ const mailer = require("../helpers/mailer");
 const { constants } = require("../helpers/constants");
 
 /**
+ * To-do 
+ * add login errors. 
+ * add email confrimation errors. 
+ * 
+ * Make login use username rather than email
+ * compeltely deprecate email confirmation?
+ * 
+ * 
+ */
+var errors = {
+	usernameInvalid: "Username must be specified.",
+	usernameInUse: "Username already in use",
+	usernameBadFormat: "username has non-alphanumeric characters.",
+	emailInvalid: "E-mail must be specified",
+	emailInUse: "E-mail already in use",
+	passwordInvalid: "Password must be 6 characters or greater",
+	loginInvalid: "Invalid username or password"
+}
+
+/**
  * User registration.
  *
  * @param {string}      username
@@ -24,24 +44,24 @@ exports.register = [
 	// 	.isAlphanumeric().withMessage("First name has non-alphanumeric characters."),
 	// body("lastName").isLength({ min: 1 }).trim().withMessage("Last name must be specified.")
 	// 	.isAlphanumeric().withMessage("Last name has non-alphanumeric characters."),
-	body("username").isLength({ min: 1 }).trim().withMessage("username must be specified.")
-	.isAlphanumeric().withMessage("username has non-alphanumeric characters.").custom((value) => {
+	body("username").isLength({ min: 1 }).trim().withMessage(errors.usernameInvalid)
+	.isAlphanumeric().withMessage(errors.usernameBadFormat).custom((value) => {
 		//not tested. assuming it works since it works for email.
 		return UserModel.findOne({username : value}).then((user) => {
 			if (user) {
-				return Promise.reject("username already in use");
+				return Promise.reject(errors.usernameInUse);
 			}
 		});
 	}),
-	body("email").isLength({ min: 1 }).trim().withMessage("Email must be specified.")
-		.isEmail().withMessage("Email must be a valid email address.").custom((value) => {
+	body("email").isLength({ min: 1 }).trim().withMessage(errors.emailInvalid)
+		.isEmail().withMessage(errors.emailInvalid).custom((value) => {
 			return UserModel.findOne({email : value}).then((user) => {
 				if (user) {
-					return Promise.reject("E-mail already in use");
+					return Promise.reject(errors.emailInUse);
 				}
 			});
 		}),
-	body("password").isLength({ min: 6 }).trim().withMessage("Password must be 6 characters or greater."),
+	body("password").isLength({ min: 6 }).trim().withMessage(errors.passwordInvalid),
 	// Sanitize fields.
 	// sanitizeBody("firstName").escape(),
 	// sanitizeBody("lastName").escape(),
@@ -64,8 +84,7 @@ exports.register = [
 					// Create User object with escaped and trimmed data
 					var user = new UserModel(
 						{
-							firstName: req.body.firstName,
-							lastName: req.body.lastName,
+							username: req.body.username,
 							email: req.body.email,
 							password: hash,
 							confirmOTP: otp
@@ -85,8 +104,7 @@ exports.register = [
 							if (err) { return apiResponse.ErrorResponse(res, err); }
 							let userData = {
 								_id: user._id,
-								firstName: user.firstName,
-								lastName: user.lastName,
+								username: user.username,
 								email: user.email
 							};
 							return apiResponse.successResponseWithData(res,"Registration Success.", userData);
@@ -112,10 +130,10 @@ exports.register = [
  * @returns {Object}
  */
 exports.login = [
-	body("email").isLength({ min: 1 }).trim().withMessage("Email must be specified.")
-		.isEmail().withMessage("Email must be a valid email address."),
-	body("password").isLength({ min: 1 }).trim().withMessage("Password must be specified."),
-	sanitizeBody("email").escape(),
+	body("username").isLength({ min: 1 }).trim().withMessage(errors.usernameInvalid)
+		.isAlphanumeric().withMessage(errors.usernameBadFormat),
+	body("password").isLength({ min: 1 }).trim().withMessage(errors.passwordInvalid),
+	sanitizeBody("username").escape(),
 	sanitizeBody("password").escape(),
 	(req, res) => {
 		try {
@@ -123,7 +141,7 @@ exports.login = [
 			if (!errors.isEmpty()) {
 				return apiResponse.validationErrorWithData(res, "Validation Error.", errors.array());
 			}else {
-				UserModel.findOne({email : req.body.email}).then(user => {
+				UserModel.findOne({username : req.body.username}).then(user => {
 					if (user) {
 						//Compare given password with db's hash.
 						bcrypt.compare(req.body.password,user.password,function (err,same) {
@@ -134,9 +152,8 @@ exports.login = [
 									if(user.status) {
 										let userData = {
 											_id: user._id,
-											firstName: user.firstName,
-											lastName: user.lastName,
-											email: user.email,
+											username: user.username,
+											email: user.email
 										};
 										//Prepare JWT token for authentication
 										const jwtPayload = userData;
