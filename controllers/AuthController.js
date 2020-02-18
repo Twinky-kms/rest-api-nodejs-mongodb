@@ -124,7 +124,7 @@ exports.register = [
 /**
  * User login.
  *
- * @param {string}      email
+ * @param {string}      username
  * @param {string}      password
  *
  * @returns {Object}
