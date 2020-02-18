@@ -13,13 +13,15 @@ let transporter = nodemailer.createTransport({
 
 exports.send = function (from, to, subject, html)
 {
+	//disable sending confirmation emails for pigeon social app alpha. 
+	return; 
 	// send mail with defined transport object
 	// visit https://nodemailer.com/ for more options
-	return transporter.sendMail({
-		from: from, // sender address e.g. no-reply@xyz.com or "Fred Foo 👻" <foo@example.com>
-		to: to, // list of receivers e.g. bar@example.com, baz@example.com
-		subject: subject, // Subject line e.g. 'Hello ✔'
-		//text: text, // plain text body e.g. Hello world?
-		html: html // html body e.g. '<b>Hello world?</b>'
-	});
+	// return transporter.sendMail({
+	// 	from: from, // sender address e.g. no-reply@xyz.com or "Fred Foo 👻" <foo@example.com>
+	// 	to: to, // list of receivers e.g. bar@example.com, baz@example.com
+	// 	subject: subject, // Subject line e.g. 'Hello ✔'
+	// 	//text: text, // plain text body e.g. Hello world?
+	// 	html: html // html body e.g. '<b>Hello world?</b>'
+	// });
 };
