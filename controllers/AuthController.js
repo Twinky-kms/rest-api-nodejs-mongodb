@@ -91,12 +91,12 @@ exports.register = [
 						}
 					);
 					// Html email body
-					let html = "<p>Please Confirm your Account.</p><p>OTP: "+otp+"</p>";
+					let html = "<p>Welcome to pigeon social app.</p><p>We hope you enjoy the alpha of the pigeon social app. Please keep in mind that this is an alpha and is still a work in progress.</p>";
 					// Send confirmation email
 					mailer.send(
 						constants.confirmEmails.from, 
 						req.body.email,
-						"Confirm Account",
+						"Welcome to pigeon social app (alpha)!",
 						html
 					).then(function(){
 						// Save user.
