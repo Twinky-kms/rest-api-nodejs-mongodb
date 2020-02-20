@@ -11,20 +11,19 @@ const UserModel = require("../models/UserModel");
  */
 
 describe("Auth", () => {
-  
+
 	// Before each test we empty the database
-	before((done) => { 
-		UserModel.deleteMany({}, (err) => { 
-			done();           
-		});        
+	before((done) => {
+		UserModel.deleteMany({}, (err) => {
+			done();
+		});
 	});
 
 	// Prepare data for testing
 	const testData = {
-		"firstName":"test",
-		"lastName":"testing",
-		"password":"Test@123",
-		"email":"maitraysuthar@test12345.com"
+		"username": "suhhdood3231",
+		"email": "thevodkastudios@gmail.com",
+		"password": "Test@123"
 	};
 
 	/*
@@ -34,7 +33,7 @@ describe("Auth", () => {
 		it("It should send validation error for Register", (done) => {
 			chai.request(server)
 				.post("/api/auth/register")
-				.send({"email": testData.email})
+				.send({ "username": testData.username })
 				.end((err, res) => {
 					res.should.have.status(400);
 					done();
@@ -49,7 +48,11 @@ describe("Auth", () => {
 		it("It should Register user", (done) => {
 			chai.request(server)
 				.post("/api/auth/register")
-				.send(testData)
+				.send({
+					"username": testData.username,
+					"email": testData.email,
+					"password": testData.password
+				})
 				.end((err, res) => {
 					res.should.have.status(200);
 					res.body.should.have.property("message").eql("Registration Success.");
@@ -58,55 +61,55 @@ describe("Auth", () => {
 				});
 		});
 	});
-  
-	/*
-  * Test the /POST route
-  */
-	describe("/POST Login", () => {
-		it("it should Send account not confirm notice.", (done) => {
-			chai.request(server)
-				.post("/api/auth/login")
-				.send({"email": testData.email,"password": testData.password})
-				.end((err, res) => {
-					res.should.have.status(401);
-					res.body.should.have.property("message").eql("Account is not confirmed. Please confirm your account.");
-					done();
-				});
-		});
-	});
 
 	/*
-  * Test the /POST route
+  * Test the /POST route UNUSED
   */
-	describe("/POST Resend  Confirm OTP", () => {
-		it("It should resend  confirm OTP", (done) => {
-			chai.request(server)
-				.post("/api/auth/resend-verify-otp")
-				.send({"email": testData.email})
-				.end((err, res) => {
-					res.should.have.status(200);
-					UserModel.findOne({_id: testData._id},"confirmOTP").then((user)=>{                
-						testData.confirmOTP = user.confirmOTP;
-						done();
-					});
-				});
-		});
-	});
+	// describe("/POST Login", () => {
+	// 	it("it should Send account not confirm notice.", (done) => {
+	// 		chai.request(server)
+	// 			.post("/api/auth/login")
+	// 			.send({"username": testData.username,"password": testData.password})
+	// 			.end((err, res) => {
+	// 				res.should.have.status(200);
+	// 				res.body.should.have.property("message").eql("Account is not confirmed. Please confirm your account.");
+	// 				done();
+	// 			});
+	// 	});
+	// });
 
 	/*
-  * Test the /POST route
+  * Test the /POST route UNSUSED.
   */
-	describe("/POST Verify Confirm OTP", () => {
-		it("It should verify confirm OTP", (done) => {
-			chai.request(server)
-				.post("/api/auth/verify-otp")
-				.send({"email": testData.email, "otp": testData.confirmOTP})
-				.end((err, res) => {
-					res.should.have.status(200);
-					done();
-				});
-		});
-	});
+	// describe("/POST Resend  Confirm OTP", () => {
+	// 	it("It should resend  confirm OTP", (done) => {
+	// 		chai.request(server)
+	// 			.post("/api/auth/resend-verify-otp")
+	// 			.send({"email": testData.email})
+	// 			.end((err, res) => {
+	// 				res.should.have.status(200);
+	// 				UserModel.findOne({_id: testData._id},"confirmOTP").then((user)=>{                
+	// 					testData.confirmOTP = user.confirmOTP;
+	// 					done();
+	// 				});
+	// 			});
+	// 	});
+	// });
+
+	/*
+  * Test the /POST route UNUSED
+  */
+	// describe("/POST Verify Confirm OTP", () => {
+	// 	it("It should verify confirm OTP", (done) => {
+	// 		chai.request(server)
+	// 			.post("/api/auth/verify-otp")
+	// 			.send({"email": testData.email, "otp": testData.confirmOTP})
+	// 			.end((err, res) => {
+	// 				res.should.have.status(200);
+	// 				done();
+	// 			});
+	// 	});
+	// });
 
 	/*
   * Test the /POST route
@@ -115,7 +118,7 @@ describe("Auth", () => {
 		it("It should send validation error for Login", (done) => {
 			chai.request(server)
 				.post("/api/auth/login")
-				.send({"email": testData.email})
+				.send({ "userrname": testData.username })
 				.end((err, res) => {
 					res.should.have.status(400);
 					done();
@@ -130,7 +133,7 @@ describe("Auth", () => {
 		it("it should Send failed user Login", (done) => {
 			chai.request(server)
 				.post("/api/auth/login")
-				.send({"email": "admin@admin.com","password": "1234"})
+				.send({ "username": "admin", "password": "1234" })
 				.end((err, res) => {
 					res.should.have.status(401);
 					done();
@@ -145,7 +148,7 @@ describe("Auth", () => {
 		it("it should do user Login", (done) => {
 			chai.request(server)
 				.post("/api/auth/login")
-				.send({"email": testData.email,"password": testData.password})
+				.send({ "username": testData.username, "password": testData.password })
 				.end((err, res) => {
 					res.should.have.status(200);
 					res.body.should.have.property("message").eql("Login Success.");
